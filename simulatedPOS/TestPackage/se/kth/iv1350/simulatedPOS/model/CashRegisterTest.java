@@ -29,7 +29,7 @@ class CashRegisterTest {
 
 	@Test
 	void addPaymentCorrectChange() {
-		double amountPaid = 122.3;
+		double amountPaid = 100;
 		double acctResult = this.cashRegister.addPayment(amountPaid, this.sale.getSaleDTO());
 		this.sale.registerPayment(amountPaid);
 		double expResult = this.sale.getSaleDTO().payment.change;

@@ -35,7 +35,7 @@ class SaleTest {
 		int expNumberOfItemsAdded = 1;
 		int acctNumberOfItemsAdded = this.sale.numberOfItems;
 
-		assertEquals(acctResult, expResult, "Item was added but was not found in inventory.");
+		assertEquals(acctResult, expResult, "Item was added but was not found in sold items.");
 		assertEquals(expNumberOfItemsAdded, acctNumberOfItemsAdded, "The numbers of items sold do not equal the expected number.");
 	}
 
