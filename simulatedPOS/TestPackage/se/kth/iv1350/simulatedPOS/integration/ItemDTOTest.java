@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ItemDTOTest {
-	ItemDTO firstItem = new ItemDTO("1", "Tape", 3, 7);
-	ItemDTO secondItem = new ItemDTO("1", "Tape", 3, 7);
+	ItemDTO firstItem;
+	ItemDTO secondItem;
 
 	@BeforeEach
 	void setUp(){

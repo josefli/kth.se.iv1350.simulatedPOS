@@ -8,6 +8,7 @@ import se.kth.iv1350.simulatedPOS.model.SaleDTO;
 
 public class Accounting {
 
+	public boolean saleLogged = false;
 	/**
 	 * Creates an instance of the accounting system used as a reference.
 	 */
@@ -22,7 +23,9 @@ public class Accounting {
 	 * @param currentSale sale to log
 	 */
 
-	public void logSale(SaleDTO currentSale){
+	public void logSale(SaleDTO currentSale) {
+
 		// Logs the sale in the accounting system
+		this.saleLogged = true;
 	}
 }

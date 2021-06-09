@@ -1,10 +1,9 @@
 package se.kth.iv1350.simulatedPOS.controller;
 
-import se.kth.iv1350.simulatedPOS.integration.CustomerDTO;
-import se.kth.iv1350.simulatedPOS.integration.DiscountDTO;
-import se.kth.iv1350.simulatedPOS.integration.ItemDTO;
-import se.kth.iv1350.simulatedPOS.integration.RegistryCreator;
+import se.kth.iv1350.simulatedPOS.integration.*;
 import se.kth.iv1350.simulatedPOS.model.*;
+
+import java.io.InvalidObjectException;
 
 /**
  * The controller class, connecting the view with the model and integration layers.
@@ -12,8 +11,7 @@ import se.kth.iv1350.simulatedPOS.model.*;
 
 public class Controller {
 
-	public RegistryCreator registryCreator;
-	private DiscountCounter discountCounter;
+	private RegistryCreator registryCreator;
 	private Sale currentSale;
 	private CashRegister cashRegister;
 
@@ -25,12 +23,11 @@ public class Controller {
 
 	public Controller(RegistryCreator registryCreator){
 
-		this.discountCounter = new DiscountCounter();
 		this.registryCreator = registryCreator;
 		this.cashRegister = new CashRegister();
 	}
 
-	private void updateInventory(){
+	private void updateInventory() {
 		this.registryCreator.getInventory().updateInventory(this.currentSale);
 	}
 
@@ -41,6 +38,16 @@ public class Controller {
 
 	public Sale getSale(){
 		return this.currentSale;
+	}
+
+	/**
+	 * A getter for the current running total DTO.
+	 *
+	 * @return RunningTotalDTO of the current sale.
+	 */
+
+	public RunningTotalDTO getRunningTotal(){
+		return this.currentSale.getRunningTotalDTO();
 	}
 
 	/**
@@ -73,53 +80,12 @@ public class Controller {
 	}
 
 	/**
-	 * A getter for the current running total DTO.
-	 *
-	 * @return RunningTotalDTO of the current sale.
-	 */
-
-	public RunningTotalDTO getRunningTotal(){
-		return this.currentSale.getRunningTotalDTO();
-	}
-
-	/**
-	 * Increases the quantity for the last item added and returns the updated running total.
-	 *
-	 * @param quantity how many of the item that should be registered.
-	 * @return The updated running total.
-	 */
-
-	public RunningTotalDTO enterQuantity(int quantity){
-		RunningTotalDTO newRunningTotal = this.currentSale.increaseQuantity(quantity);
-		return newRunningTotal;
-	}
-
-	/**
-	 * Returns the discounted total based on the provided customerID.
-	 *
-	 * @param customerID The identification linked to discounts.
-	 * @return discounted running total.
-	 */
-	public RunningTotalDTO requestDiscount(String customerID) {
-
-		CustomerDTO customerDTO = this.registryCreator.getCustomerRegistry().findCustomer(customerID);
-		SaleDTO saleDTO = this.currentSale.getSaleDTO();
-		DiscountDTO customerDiscountDTO = this.registryCreator.getDiscountRegistry().findCustomerDiscount(customerDTO);
-		DiscountDTO storeDiscountDTO = this.registryCreator.getDiscountRegistry().findStoreDiscount(saleDTO);
-
-		this.discountCounter.calculateDiscount(this.currentSale, customerDiscountDTO, storeDiscountDTO);
-
-		RunningTotalDTO discountedTotalDTO = this.currentSale.getRunningTotalDTO();
-		return discountedTotalDTO;
-	}
-
-	/**
 	 * Enters the amount paid to the cash register and returns the change.
 	 *
 	 * @param amount the amount to add to the cash register
 	 * @return the amount of change for the purchase
 	 */
-	public double amountPaid(double amount){
+	public double makePayment(double amount) {
 		double change =  this.cashRegister.addPayment(amount, this.currentSale.getSaleDTO());
 		this.currentSale.registerPayment(amount);
 		updateInventory();

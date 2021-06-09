@@ -24,7 +24,7 @@ public final class ItemDTO {
 
 	/**
 	 * Compares an itemDTO to another to see if they are equal based on attributes.
-	 * @param otherItem
+	 * @param otherItem item to compare to.
 	 * @return Boolean on whether all attributes are the same or not.
 	 */
 

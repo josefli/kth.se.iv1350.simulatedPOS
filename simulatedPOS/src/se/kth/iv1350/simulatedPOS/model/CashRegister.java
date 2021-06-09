@@ -24,9 +24,11 @@ public class CashRegister {
 	 * @return The amount of change to give back to the customer.
 	 */
 
-	public double addPayment(double paymentAmount, SaleDTO currentSale){
+	public double addPayment(double paymentAmount, SaleDTO currentSale) {
 		this.balance += paymentAmount;
 		double change = paymentAmount - currentSale.runningTotal;
+		this.balance -= change;
+
 		return change;
 	}
 

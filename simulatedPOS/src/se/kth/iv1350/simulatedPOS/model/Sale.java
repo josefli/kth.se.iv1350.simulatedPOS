@@ -4,7 +4,7 @@ import se.kth.iv1350.simulatedPOS.integration.Accounting;
 import se.kth.iv1350.simulatedPOS.integration.ItemDTO;
 import se.kth.iv1350.simulatedPOS.integration.StoreDTO;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -13,14 +13,13 @@ import java.util.Set;
  */
 
 public class Sale {
-	LocalTime timeOfSale;
-	public double runningTotal;
+	LocalDateTime timeOfSale;
+	double runningTotal;
 	double tax;
-	public int numberOfItems;
-	private ItemDTO lastAddedItem;
+	public int numberOfItemsUsedToCheckConnectionException;
 	private Accounting accounting;
+	private SaleDTO currentSaleDTO;
 	PaymentDTO paymentDTO;
-	SaleDTO currentSaleDTO;
 	RunningTotalDTO currentRunningTotalDTO;
 	StoreDTO storeDTO;
 	HashMap <ItemDTO, Integer> soldItems;
@@ -35,16 +34,16 @@ public class Sale {
 		this.accounting = accounting;
 		this.soldItems = new HashMap<>();
 		this.runningTotal = 0;
-		this.numberOfItems = 0;
+		this.numberOfItemsUsedToCheckConnectionException = 0;
 		this.paymentDTO = new PaymentDTO(0, 0);
 		this.tax = 0;
+		this.storeDTO = new StoreDTO("My Store", "Cool Street", "1337", "7337", "Funk Town");
 		this.currentSaleDTO = new SaleDTO(this);
 		this.currentRunningTotalDTO = new RunningTotalDTO(this);
-		this.storeDTO = new StoreDTO("My Store", "Cool Street", "1337", "7337", "Funk Town");
 	}
 
 	private void setTimeOfSale(){
-		this.timeOfSale = LocalTime.now();
+		this.timeOfSale = LocalDateTime.now();
 	}
 
 	private void newSaleDTO(){
@@ -90,7 +89,7 @@ public class Sale {
 	 */
 
 	public RunningTotalDTO getRunningTotalDTO() {
-		return this.currentRunningTotalDTO;
+		return currentRunningTotalDTO;
 	}
 
 	/**
@@ -99,7 +98,7 @@ public class Sale {
 	 */
 
 	public SaleDTO getSaleDTO(){
-		return this.currentSaleDTO;
+		return currentSaleDTO;
 	}
 
 	/**
@@ -109,7 +108,6 @@ public class Sale {
 	 */
 
 	public SaleDTO addSoldItem(ItemDTO itemToAdd){
-
 		if(this.soldItems.containsKey(itemToAdd)) {
 			increaseSoldItem(itemToAdd);
 		}
@@ -117,24 +115,9 @@ public class Sale {
 			this.soldItems.put(itemToAdd, 1);
 		}
 		this.runningTotal += itemToAdd.price;
-		this.numberOfItems += 1;
-		this.lastAddedItem = itemToAdd;
+		this.numberOfItemsUsedToCheckConnectionException += 1;
 		updateSaleParameters();
-		return this.getSaleDTO();
-	}
-
-	/**
-	 * Increases the quantity of the last added object.
-	 *
-	 * @param quantity How many of the item there should be
-	 * @return The updated running total.
-	 */
-
-	public RunningTotalDTO increaseQuantity(int quantity){
-		soldItems.put(lastAddedItem, soldItems.get(lastAddedItem) + quantity - 1);
-		this.runningTotal += lastAddedItem.price * (quantity - 1);
-		updateSaleParameters();
-		return this.getRunningTotalDTO();
+		return getSaleDTO();
 	}
 
 	/**
@@ -143,10 +126,11 @@ public class Sale {
 	 * @param amount The amount that was paid.
 	 */
 
-	public void registerPayment(double amount){
+	public void registerPayment(double amount) {
+
+		this.accounting.logSale(this.getSaleDTO());
 		double change = amount - this.runningTotal;
 		this.paymentDTO = new PaymentDTO(amount, change);
-		this.accounting.logSale(this.getSaleDTO());
 		this.newSaleDTO();
 		this.newRunningTotalDTO();
 		new Receipt(this.getSaleDTO());

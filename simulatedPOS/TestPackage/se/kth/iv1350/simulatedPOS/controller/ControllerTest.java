@@ -7,10 +7,13 @@ import se.kth.iv1350.simulatedPOS.integration.ItemDTO;
 import se.kth.iv1350.simulatedPOS.integration.RegistryCreator;
 import se.kth.iv1350.simulatedPOS.model.RunningTotalDTO;
 
+import java.io.InvalidObjectException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ControllerTest {
-	private Controller contr = new Controller(new RegistryCreator());
+	private RegistryCreator regCreator = new RegistryCreator();
+	private Controller contr = new Controller(regCreator);
 
 	@BeforeEach
 	void setUp() {
@@ -27,7 +30,7 @@ class ControllerTest {
 	}
 
 	@Test
-	void testEndSale() {
+	void testEndSaleRunningTotal() {
 		this.contr.getSale().addSoldItem(new ItemDTO("0001", "Milk", 12, 5));
 		RunningTotalDTO expResult = this.contr.getSale().getRunningTotalDTO();
 		RunningTotalDTO acctResult = this.contr.endSale();
@@ -35,7 +38,7 @@ class ControllerTest {
 	}
 
 	@Test
-	void testScanItem() {
+	void testScanItemAddedTOSoldItems() {
 		ItemDTO item = this.contr.scanItem("00001");
 		boolean expResult = true;
 		boolean actResult = this.contr.getSale().getSaleDTO().soldItems.containsKey(item);
@@ -43,16 +46,49 @@ class ControllerTest {
 	}
 
 	@Test
-	void testScanItemAfterAItemIsScanned() {
-		this.contr.scanItem("00001");
-		ItemDTO item = this.contr.scanItem("00002");
+	void testScanMultipleItemsAddedTOSoldItems() {
+		ItemDTO firstItem = this.contr.scanItem("00001");
+		ItemDTO secondItem = this.contr.scanItem("00001");
+		ItemDTO thirdItem = this.contr.scanItem("00001");
 		boolean expResult = true;
-		boolean actResult = this.contr.getSale().getSaleDTO().soldItems.containsKey(item);
-		assertEquals(expResult, actResult, "Scanned item was not added to sale and returned correctly.");
+		boolean actResultFirst = this.contr.getSale().getSaleDTO().soldItems.containsKey(firstItem);
+		assertEquals(expResult, actResultFirst, "First Scanned item was not added to sale and " +
+				  "returned correctly.");
+
+		boolean actResultSecond = this.contr.getSale().getSaleDTO().soldItems.containsKey(secondItem);
+		assertEquals(expResult, actResultSecond, "Second scanned item was not added to sale and " +
+				  "returned correctly.");
+
+		boolean actResultThird = this.contr.getSale().getSaleDTO().soldItems.containsKey(thirdItem);
+		assertEquals(expResult, actResultThird, "Third scanned item was not added to sale and " +
+				  "returned correctly.");
+
 	}
 
 	@Test
-	void testScanItemSecondTime() {
+	void testScanItemUpdateRunningTotal() {
+		String itemID = "00001";
+
+		this.contr.scanItem(itemID);
+		double expResult = this.regCreator.getItemDTO(itemID).price;
+		double actResult = this.contr.getSale().getSaleDTO().runningTotal;
+		assertEquals(expResult, actResult, "Running total was incorrectly updated.");
+	}
+
+	@Test
+	void testScanMultipleItemsRunningTotalUpdated() {
+
+		ItemDTO firstItem = this.contr.scanItem("00001");
+		ItemDTO secondItem = this.contr.scanItem("00001");
+		ItemDTO thirdItem = this.contr.scanItem("00001");
+		double expResult = firstItem.price + secondItem.price + thirdItem.price;
+		double actResult = this.contr.getSale().getSaleDTO().runningTotal;
+		assertEquals(expResult, actResult, "Running total was not updated correctly after " +
+				  "multiple items were added.");
+	}
+
+	@Test
+	void testScanItemTwice() {
 		this.contr.scanItem("00001");
 		ItemDTO item = this.contr.scanItem("00001");
 		boolean expResult = true;
@@ -72,6 +108,7 @@ class ControllerTest {
 
 	@Test
 	void testScanItemIncreaseQuantity() {
+
 		this.contr.scanItem("00001");
 		ItemDTO item = this.contr.scanItem("00001");
 		int expResult = 2;
@@ -81,6 +118,7 @@ class ControllerTest {
 
 	@Test
 	void testScanItemIncreaseQuantityNotScannedImmediatelyAfter() {
+
 		this.contr.scanItem("00001");
 		this.contr.scanItem("00004");
 		this.contr.scanItem("00001");
@@ -88,16 +126,18 @@ class ControllerTest {
 		ItemDTO item = this.contr.scanItem("00001");
 		int expResult = 3;
 		int actResult = this.contr.getSale().getSaleDTO().soldItems.get(item);
-		assertEquals(expResult, actResult, "Item was scanned multiple times but the sold quantity was not increased.");
+		assertEquals(expResult, actResult, "Item was scanned multiple times but the sold " +
+				  "quantity was not increased.");
 	}
 
 	@Test
 	void testGetRunningTotal() {
+
 		ItemDTO firstAddedItem = this.contr.scanItem("00001");
 		ItemDTO secondAddedItem = this.contr.scanItem("00002");
 		double expTotal = firstAddedItem.price + secondAddedItem.price;
-		double expTax = (firstAddedItem.tax * firstAddedItem.price
-				  + secondAddedItem.tax * secondAddedItem.price) / expTotal;
+		double expTax = Math.round(100.0 * (firstAddedItem.tax * firstAddedItem.price
+				  + secondAddedItem.tax * secondAddedItem.price) / expTotal) / 100.0;
 
 		RunningTotalDTO runningTotalDTO = this.contr.getRunningTotal();
 		double actTotal = runningTotalDTO.runningTotal;
@@ -108,80 +148,51 @@ class ControllerTest {
 	}
 
 	@Test
-	void testGetRunningTotalNothingAdded() {
-		double expTotal = 0;
-		double expTax = 0;
+	void testMakePayment() {
 
-		RunningTotalDTO runningTotalDTO = this.contr.getRunningTotal();
-		double actTotal = runningTotalDTO.runningTotal;
-		double actTax = runningTotalDTO.tax;
-
-		assertEquals(expTotal, actTotal, "The total is not 0 despite no items being added to sale.");
-		assertEquals(expTax, actTax, "The tax is not 0 despite no items being added to sale.");
-	}
-
-	@Test
-	void testEnterQuantity() {
-		String itemID = "00001";
-		int quantity = 4;
-		ItemDTO item = this.contr.scanItem(itemID);
-		this.contr.enterQuantity(quantity);
-		int expResult = quantity;
-		int acctResult = this.contr.getSale().getSaleDTO().soldItems.get(item);
-
-		assertEquals(expResult, acctResult, "The quantity of the item was not added correctly.");
-	}
-
-	@Test
-	void testEnterQuantityOne() {
-		String itemID = "00001";
-		int quantity = 1;
-		ItemDTO item = this.contr.scanItem(itemID);
-		this.contr.enterQuantity(quantity);
-		int expResult = quantity;
-		int acctResult = this.contr.getSale().getSaleDTO().soldItems.get(item);
-
-		assertEquals(expResult, acctResult, "The quantity (1) of the item was not added correctly.");
-	}
-
-	@Test
-	void testEnterQuantityAfterAnotherItemIsAdded() {
-		String itemID = "00001";
-		int quantity = 3;
-		this.contr.scanItem("00004");
-		ItemDTO item = this.contr.scanItem(itemID);
-		this.contr.enterQuantity(quantity);
-		int expResult = quantity;
-		int acctResult = this.contr.getSale().getSaleDTO().soldItems.get(item);
-
-		assertEquals(expResult, acctResult, "The quantity of the item was not added correctly.");
-	}
-
-	@Test
-	void testAmountPaid() {
 		ItemDTO item = this.contr.scanItem("00001");
 		double amount = 50;
 		this.contr.endSale();
-		double actChange = this.contr.amountPaid(amount);
+		double actChange = this.contr.makePayment(amount);
 		double expChange = amount - item.price;
 
 		double actPaidAmount = this.contr.getSale().getSaleDTO().payment.getAmountPaid();
 
 		assertEquals(expChange, actChange, "The expected change differs from the actual registered change.");
-		assertEquals(amount, actPaidAmount, "The paid amount registered does not match the actual amount paid.");
+		assertEquals(amount, actPaidAmount, "The paid amount registered does not match " +
+				  "the actual amount paid.");
 	}
 
 	@Test
-	void testAmountPaidNoChange() {
+	void testMakePaymentSameAsRunningTotal() {
 		ItemDTO item = this.contr.scanItem("00001");
 		double amount = item.price;
 		this.contr.endSale();
-		double actChange = this.contr.amountPaid(amount);
+		double actChange = this.contr.makePayment(amount);
+		double expChange = amount - item.price;
+
+		double actPaidAmount = this.contr.getSale().getSaleDTO().payment.getAmountPaid();
+
+		assertEquals(expChange, actChange, "Actual change was not zero.");
+		assertEquals(amount, actPaidAmount, "The paid amount registered does not match " +
+				  "the actual amount paid.");
+	}
+
+
+	@Test
+	void testMakePaymentNoChange() {
+		ItemDTO item = this.contr.scanItem("00001");
+		double amount = item.price;
+		this.contr.endSale();
+		double actChange = this.contr.makePayment(amount);
 		double expChange = 0;
 
 		double actPaidAmount = this.contr.getSale().getSaleDTO().payment.getAmountPaid();
 
-		assertEquals(expChange, actChange, "Change is returned despite the paid amount equals the running total.");
-		assertEquals(amount, actPaidAmount, "The paid amount registered does not match the actual amount paid.");
+		assertEquals(expChange, actChange, "Change is returned despite that the paid amount" +
+				  " equals the running total.");
+		assertEquals(amount, actPaidAmount, "The paid amount registered does not match " +
+				  "the actual amount paid.");
 	}
 }
+

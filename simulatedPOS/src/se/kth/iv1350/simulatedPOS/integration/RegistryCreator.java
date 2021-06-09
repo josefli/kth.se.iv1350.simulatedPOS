@@ -6,8 +6,6 @@ package se.kth.iv1350.simulatedPOS.integration;
 
 public class RegistryCreator {
 
-	private CustomerRegistry customerRegistry;
-	private DiscountRegistry discountRegistry;
 	private Accounting accounting;
 	private Inventory inventory;
 
@@ -17,8 +15,6 @@ public class RegistryCreator {
 
 	public RegistryCreator(){
 
-		this.customerRegistry = new CustomerRegistry();
-		this.discountRegistry = new DiscountRegistry();
 		this.accounting = new Accounting();
 		this.inventory = new Inventory();
 
@@ -33,26 +29,6 @@ public class RegistryCreator {
 
 	public ItemDTO getItemDTO(String itemIdentifier) {
 		return inventory.getItemDTO(itemIdentifier);
-	}
-
-	/**
-	 * Getter for the customer registry.
-	 *
-	 * @return Customer registry reference.
-	 */
-
-	public CustomerRegistry getCustomerRegistry(){
-		return this.customerRegistry;
-	}
-
-	/**
-	 * Getter for the discount registry.
-	 *
-	 * @return Discount registry reference.
-	 */
-
-	public DiscountRegistry getDiscountRegistry(){
-		return this.discountRegistry;
 	}
 
 	/**

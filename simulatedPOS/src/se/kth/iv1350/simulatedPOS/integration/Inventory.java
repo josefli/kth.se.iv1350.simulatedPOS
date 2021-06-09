@@ -2,6 +2,7 @@ package se.kth.iv1350.simulatedPOS.integration;
 
 import java.util.HashMap;
 import java.util.Set;
+
 import se.kth.iv1350.simulatedPOS.model.Sale;
 
 /**
@@ -10,18 +11,19 @@ import se.kth.iv1350.simulatedPOS.model.Sale;
 
 public class Inventory {
 
-	HashMap <ItemDTO, Integer> inventoryList;
+	HashMap<ItemDTO, Integer> inventoryList;
+	public boolean inventoryUpdated = false;
 
 	/**
 	 * Creates an instance of the inventory system used as a reference.
 	 */
 
-	public Inventory(){
+	public Inventory() {
 		this.inventoryList = new HashMap<>();
 		setUpTestInventoryDatabase();
 	}
 
-	private void setUpTestInventoryDatabase(){
+	private void setUpTestInventoryDatabase() {
 		ItemDTO milkDTO = new ItemDTO("00001", "Milk", 10, 5);
 		ItemDTO butterDTO = new ItemDTO("00002", "Butter", 45, 10);
 		ItemDTO flourDTO = new ItemDTO("00003", "Flour", 19, 7);
@@ -41,7 +43,7 @@ public class Inventory {
 	 * @param itemToAdd Item to add to inventory.
 	 */
 
-	void addItemDTOToInventory(ItemDTO itemToAdd){
+	private void addItemDTOToInventory(ItemDTO itemToAdd) {
 		int quantityToAddToInventory = 10;
 		this.inventoryList.put(itemToAdd, quantityToAddToInventory);
 	}
@@ -49,11 +51,13 @@ public class Inventory {
 	/**
 	 * Updates the inventory based on sold items of the completed sale. An empty method.
 	 *
-	 * @param sale the sale based on which the inventory will be updated
+	 * @param sale the sale based on which the inventory will be updated.
 	 */
 
-	public void updateInventory(Sale sale){
+	public void updateInventory(Sale sale) {
+
 		// Updates inventory based on items sold
+		this.inventoryUpdated = true;
 	}
 
 	/**
@@ -81,7 +85,7 @@ public class Inventory {
 	 * @return Boolean of whether the item was found or not.
 	 */
 
-	public boolean checkIfItemInInventory(String itemID){
+	public boolean checkIfItemInInventory(String itemID) {
 		Set<ItemDTO> itemDTOSet = inventoryList.keySet();
 
 		for (ItemDTO itemDTO : itemDTOSet) {

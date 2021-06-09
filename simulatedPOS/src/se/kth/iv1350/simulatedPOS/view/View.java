@@ -1,6 +1,7 @@
 package se.kth.iv1350.simulatedPOS.view;
 
 import se.kth.iv1350.simulatedPOS.controller.Controller;
+import se.kth.iv1350.simulatedPOS.integration.ItemDTO;
 
 /**
  * Represents the view.
@@ -24,25 +25,29 @@ public class View {
 	 */
 
 	public void hardCodedSale() {
-		double amountCustomerPays = 50;
-		String itemID = "00001";
-		int quantityToAdd = 3;
-
-		System.out.println("Creates a test database.");
+		double amountCustomerPays = 100;
 		this.controller.beginNewSale();
-		System.out.println("Starts new sale.");
-		String itemName = this.controller.scanItem(itemID).itemDescription;
-		System.out.println("Item scanned: " + itemName);
-		System.out.println("Current running total: " + this.controller.getRunningTotal().runningTotal + " SEK");
-		System.out.println("Current total tax: " + this.controller.getRunningTotal().tax + "%");
-		this.controller.enterQuantity(quantityToAdd);
-		System.out.println(quantityToAdd + " " + itemName + " was added.");
-		System.out.println("Current running total: "  + this.controller.getRunningTotal().runningTotal + " SEK");
-		System.out.println("Current total tax: " + this.controller.getRunningTotal().tax + "%");
+
+		presentNewScannedItem("00001");
+		presentNewScannedItem("00002");
+		presentNewScannedItem("00001");
+		presentNewScannedItem("00003");
+
 		System.out.println("End sale.");
 		System.out.println("Final running total: " + this.controller.endSale().runningTotal + " SEK");
-		System.out.println("Total tax of sale: " + this.controller.getRunningTotal().tax + "%");
-		System.out.println("Customer pays " + amountCustomerPays + " SEK and receives "
-				  + this.controller.amountPaid(amountCustomerPays) + " SEK in change.");
+		System.out.println("Total tax of sale: " + this.controller.getRunningTotal().tax + "%\n\n");
+		this.controller.makePayment(amountCustomerPays);
+	}
+
+	private void presentNewTotal(){
+		System.out.println("Current running total:\t   " + this.controller.getRunningTotal().runningTotal + " SEK");
+		System.out.println("Current total tax:\t\t\t " + this.controller.getRunningTotal().tax + "%\n");
+	}
+
+	private void presentNewScannedItem(String itemID) {
+		ItemDTO item = this.controller.scanItem(itemID);
+		System.out.println("Item scanned: " + item.itemDescription + "\t\t" + item.price + "SEK");
+		presentNewTotal();
+
 	}
 }

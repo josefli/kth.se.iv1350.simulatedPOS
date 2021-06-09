@@ -16,6 +16,6 @@ public final class RunningTotalDTO {
 
 	public RunningTotalDTO(Sale currentSale){
 		this.runningTotal = currentSale.runningTotal;
-		this.tax = currentSale.tax;
+		this.tax = (Math.round(100.0 * currentSale.tax)) / 100.0;
 	}
 }

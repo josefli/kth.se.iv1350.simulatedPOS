@@ -15,11 +15,11 @@ public class Printer {
 	}
 
 	/**
-	 * Prints the receipt created by receiptDTO. An empty method.
+	 * Prints the receiptDTO created by receipt. An empty method.
 	 *
 	 * @param receiptDTO Receipt to be printed.
 	 */
 	public void printReceipt(ReceiptDTO receiptDTO){
-
+		System.out.println(receiptDTO.fullReceipt);
 	}
 }

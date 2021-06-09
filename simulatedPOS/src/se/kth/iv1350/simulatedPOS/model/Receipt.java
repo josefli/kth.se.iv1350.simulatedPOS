@@ -19,5 +19,6 @@ public class Receipt {
 	public Receipt(SaleDTO saleDTO){
 		this.currentReceiptDTO = new ReceiptDTO(saleDTO);
 		this.printer = new Printer();
+		this.printer.printReceipt(this.currentReceiptDTO);
 	}
 }

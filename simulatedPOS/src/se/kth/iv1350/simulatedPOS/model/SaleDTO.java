@@ -3,7 +3,7 @@ package se.kth.iv1350.simulatedPOS.model;
 import se.kth.iv1350.simulatedPOS.integration.ItemDTO;
 import se.kth.iv1350.simulatedPOS.integration.StoreDTO;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 
 public final class SaleDTO {
-	final LocalTime timeOfSale;
+	final LocalDateTime timeOfSale;
 	public final double runningTotal;
 	public final int numberOfItems;
 	public final StoreDTO storeDTO;
@@ -27,9 +27,9 @@ public final class SaleDTO {
 	public SaleDTO(Sale currentSale){
 		this.timeOfSale = currentSale.timeOfSale;
 		this.runningTotal = currentSale.runningTotal;
-		this.numberOfItems = currentSale.numberOfItems;
+		this.numberOfItems = currentSale.numberOfItemsUsedToCheckConnectionException;
 		this.storeDTO = currentSale.storeDTO;
-		this.totalTaxOfPurchase = currentSale.tax;
+		this.totalTaxOfPurchase = Math.round(100.0 * currentSale.tax) / 100.0;
 		this.payment = currentSale.paymentDTO;
 		this.soldItems = currentSale.soldItems;
 	}
